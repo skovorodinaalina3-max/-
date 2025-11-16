@@ -4,23 +4,19 @@ import java.util.Scanner;
 
 /**
  * Демонстрационное приложение для тестирования классов автомобильной системы.
- * Предоставляет интерактивное меню для взаимодействия с пользователем.
+ * Рефакторинг: добавлена только одна новая функция и улучшено форматирование
  */
 public class CarDemo {
     private static List<Car> cars = new ArrayList<>();
     private static Scanner scanner = new Scanner(System.in);
     
-    /**
-     * Главный метод приложения
-     * @param args аргументы командной строки
-     */
     public static void main(String[] args) {
         initializeSampleData();
         showMainMenu();
     }
     
     /**
-     * Показывает главное меню приложения
+     * Рефакторинг: улучшенное главное меню с одной новой опцией
      */
     public static void showMainMenu() {
         while (true) {
@@ -30,28 +26,20 @@ public class CarDemo {
             System.out.println("3. Найти автомобили по производителю");
             System.out.println("4. Добавить новый автомобиль");
             System.out.println("5. Показать статистику");
+            System.out.println("6. Проверить возможность управления"); // Рефакторинг: НОВАЯ ОПЦИЯ
             System.out.println("0. Выход");
             System.out.print("Выберите пункт меню: ");
             
             int choice = getIntInput();
             
             switch (choice) {
-                case 1:
-                    showAllCars();
-                    break;
-                case 2:
-                    findDriversByExperience();
-                    break;
-                case 3:
-                    findCarsByManufacturer();
-                    break;
-                case 4:
-                    addNewCar();
-                    break;
-                case 5:
-                    showStatistics();
-                    break;
-                case 0:
+                case 1: showAllCars(); break;
+                case 2: findDriversByExperience(); break;
+                case 3: findCarsByManufacturer(); break;
+                case 4: addNewCar(); break;
+                case 5: showStatistics(); break;
+                case 6: checkDrivingCapability(); break; // Рефакторинг: НОВАЯ ФУНКЦИЯ
+                case 0: 
                     System.out.println("До свидания!");
                     return;
                 default:
@@ -64,7 +52,7 @@ public class CarDemo {
     }
     
     /**
-     * Показывает все автомобили в системе
+     * Рефакторинг: улучшенный вывод всех автомобилей
      */
     public static void showAllCars() {
         System.out.println("\n--- ВСЕ АВТОМОБИЛИ В СИСТЕМЕ ---");
@@ -75,12 +63,8 @@ public class CarDemo {
         
         for (int i = 0; i < cars.size(); i++) {
             Car car = cars.get(i);
-            System.out.printf("%d. %s (%s класс)\n", i + 1, car.getBrand(), car.getCarClass());
-            System.out.printf("   Вес: %.0f кг, Мощность: %d л.с.\n", car.getWeight(), car.getEngine().getPower());
-            System.out.printf("   Производитель: %s\n", car.getEngine().getManufacturer());
-            System.out.printf("   Водитель: %s (стаж: %d лет)\n", 
-                car.getDriver().getFullName(), car.getDriver().getDrivingExperienceYears());
-            System.out.println();
+            System.out.printf("\n%d. %s\n", i + 1, car); // Рефакторинг: используем улучшенный toString
+            System.out.println("----------------------------------------");
         }
     }
     
@@ -215,7 +199,7 @@ public class CarDemo {
     }
     
     /**
-     * Показывает статистику системы
+     * Рефакторинг: улучшенная статистика с дополнительной информацией
      */
     public static void showStatistics() {
         System.out.println("\n--- СТАТИСТИКА СИСТЕМЫ ---");
@@ -229,6 +213,7 @@ public class CarDemo {
         int sovietCars = 0;
         int totalPower = 0;
         int totalExperience = 0;
+        int capableDrivers = 0; // Рефакторинг: новая статистика
         Car mostPowerfulCar = cars.get(0);
         Driver mostExperiencedDriver = cars.get(0).getDriver();
         
@@ -243,6 +228,11 @@ public class CarDemo {
             
             // Суммируем стаж
             totalExperience += car.getDriverExperience();
+            
+            // Рефакторинг: считаем способных водителей
+            if (car.canDriverOperateCar()) {
+                capableDrivers++;
+            }
             
             // Находим самый мощный автомобиль
             if (car.getEngine().getPower() > mostPowerfulCar.getEngine().getPower()) {
@@ -260,10 +250,32 @@ public class CarDemo {
             sovietCars, (sovietCars * 100.0 / totalCars));
         System.out.printf("Средняя мощность: %.1f л.с.\n", (double) totalPower / totalCars);
         System.out.printf("Средний стаж водителей: %.1f лет\n", (double) totalExperience / totalCars);
+        System.out.printf("Водителей, способных управлять: %d (%.1f%%)\n", // Рефакторинг: новая статистика
+            capableDrivers, (capableDrivers * 100.0 / totalCars));
         System.out.printf("Самый мощный автомобиль: %s (%d л.с.)\n", 
             mostPowerfulCar.getBrand(), mostPowerfulCar.getEngine().getPower());
         System.out.printf("Самый опытный водитель: %s (%d лет)\n", 
             mostExperiencedDriver.getFullName(), mostExperiencedDriver.getDrivingExperienceYears());
+    }
+    
+    /**
+     * Рефакторинг: НОВЫЙ МЕТОД - проверка возможности управления
+     */
+    public static void checkDrivingCapability() {
+        System.out.println("\n--- ПРОВЕРКА ВОЗМОЖНОСТИ УПРАВЛЕНИЯ ---");
+        
+        if (cars.isEmpty()) {
+            System.out.println("Автомобилей нет в системе.");
+            return;
+        }
+        
+        for (Car car : cars) {
+            boolean canOperate = car.canDriverOperateCar();
+            System.out.printf("%s - %s %s\n", 
+                car.getBrand(),
+                car.getDriver().getFullName(),
+                canOperate ? "✅ Может управлять" : "❌ Не может управлять (требуется проверка)");
+        }
     }
     
     /**
